@@ -58,6 +58,7 @@ const NavItem: React.FC<NavItemProps> = ({ className, to, icon: Icon, title, act
 const AppLayout: React.FC = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const { toggleSidebar } = useSidebar();
   
   const handleLogout = () => {
     logout();
@@ -65,40 +66,39 @@ const AppLayout: React.FC = () => {
   };
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full">
-        <Sidebar className="border-r">
-          <SidebarHeader>
-            Swift Scan
-            <SidebarTrigger className="md:hidden ml-auto" />
-          </SidebarHeader>
-          <SidebarContent>
-            <div className="flex flex-col gap-2">
-              <NavItem to="/" icon={Home} title="Dashboard" />
-              <NavItem to="/attendance" icon={ClipboardList} title="Attendance" />
-              <NavItem to="/users" icon={User} title="Users" />
-              <NavItem to="/reports" icon={BarChart} title="Reports" />
-            </div>
-          </SidebarContent>
-          <SidebarFooter>
-            <Button 
-              variant="outline"
-              className="w-full flex items-center gap-2"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-4 w-4" />
-              <span>Logout</span>
-            </Button>
-          </SidebarFooter>
-        </Sidebar>
-        <div className="flex-1 ml-0 md:ml-[var(--sidebar-width)] p-4 md:p-8 transition-all duration-300">
-          <div className="md:hidden mb-4">
-            <SidebarTrigger />
+    <div className="flex min-h-screen w-full">
+      <Sidebar className="border-r">
+        <SidebarHeader>
+          Swift Scan
+          <SidebarTrigger className="md:hidden ml-auto" />
+        </SidebarHeader>
+        <SidebarContent>
+          <div className="flex flex-col gap-2">
+            <NavItem to="/" icon={Home} title="Dashboard" />
+            <NavItem to="/attendance" icon={ClipboardList} title="Attendance" />
+            <NavItem to="/users" icon={User} title="Users" />
+            <NavItem to="/reports" icon={BarChart} title="Reports" />
           </div>
-          <Outlet />
+        </SidebarContent>
+        <SidebarFooter>
+          <Button 
+            variant="outline"
+            className="w-full flex items-center gap-2"
+            onClick={handleLogout}
+          >
+            <LogOut className="h-4 w-4" />
+            <span>Logout</span>
+          </Button>
+        </SidebarFooter>
+      </Sidebar>
+      <div className="flex-1 p-4 md:p-6 overflow-x-hidden">
+        <div className="flex items-center mb-4">
+          <SidebarTrigger className="mr-4" />
+          <h1 className="text-xl font-bold">Swift Scan</h1>
         </div>
+        <Outlet />
       </div>
-    </SidebarProvider>
+    </div>
   );
 };
 
