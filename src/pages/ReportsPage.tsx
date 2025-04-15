@@ -17,7 +17,7 @@ const ReportsPage: React.FC = () => {
   const [records] = useState<AttendanceRecord[]>(initialAttendanceRecords);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [userFilter, setUserFilter] = useState("");
+  const [userFilter, setUserFilter] = useState("all");
   const [reportType, setReportType] = useState("daily");
 
   // Calculate start and end dates for month report
@@ -55,7 +55,7 @@ const ReportsPage: React.FC = () => {
         format(parseISO(record.timestamp), "yyyy-MM-dd") <= endDate;
     }
     
-    const matchesUser = userFilter === "" || record.userId === userFilter;
+    const matchesUser = userFilter === "all" || record.userId === userFilter;
     
     return matchesDateRange && matchesUser;
   });
@@ -163,7 +163,7 @@ const ReportsPage: React.FC = () => {
                     <SelectValue placeholder="All Users" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Users</SelectItem>
+                    <SelectItem value="all">All Users</SelectItem>
                     {users.map(user => (
                       <SelectItem key={user.id} value={user.id}>{user.name}</SelectItem>
                     ))}
