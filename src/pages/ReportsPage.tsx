@@ -8,9 +8,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { AttendanceRecord } from "@/types";
 import { initialAttendanceRecords } from "@/data/attendance";
 import { users } from "@/data/users";
-import { format, parseISO, startOfMonth, endOfMonth } from "date-fns";
-import { FileSpreadsheet, Search, Calendar } from "lucide-react";
+import { format, parseISO, startOfMonth, endOfMonth, subDays } from "date-fns";
+import { FileSpreadsheet, Search, Calendar, BarChart, FileText } from "lucide-react";
 import * as XLSX from 'xlsx';
+import { toast } from "sonner";
 
 const ReportsPage: React.FC = () => {
   const [records] = useState<AttendanceRecord[]>(initialAttendanceRecords);
@@ -27,6 +28,17 @@ const ReportsPage: React.FC = () => {
     
     setStartDate(format(firstDay, "yyyy-MM-dd"));
     setEndDate(format(lastDay, "yyyy-MM-dd"));
+    toast.success("Monthly report range selected");
+  };
+
+  // Set report for last 7 days
+  const handleWeeklyReport = () => {
+    const today = new Date();
+    const lastWeek = subDays(today, 7);
+    
+    setStartDate(format(lastWeek, "yyyy-MM-dd"));
+    setEndDate(format(today, "yyyy-MM-dd"));
+    toast.success("Weekly report range selected");
   };
 
   // Filter records based on date range and user
@@ -64,6 +76,11 @@ const ReportsPage: React.FC = () => {
       };
     });
     
+    if (dataToExport.length === 0) {
+      toast.warning("No data to export");
+      return;
+    }
+    
     // Create worksheet
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
     
@@ -79,55 +96,70 @@ const ReportsPage: React.FC = () => {
     
     // Save file
     XLSX.writeFile(workbook, `${reportTitle}.xlsx`);
+    toast.success("Report exported to Excel successfully!");
   };
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Attendance Reports</h1>
+      <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">Attendance Reports</h1>
       
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl">Generate Reports</CardTitle>
+      <Card className="shadow-lg border-t-4 border-t-green-500">
+        <CardHeader className="bg-gray-50 dark:bg-gray-800 rounded-t-lg flex flex-row items-center justify-between">
+          <CardTitle className="text-xl font-bold flex items-center gap-2">
+            <BarChart className="h-5 w-5 text-green-500" />
+            Generate Reports
+          </CardTitle>
+          <Button 
+            variant="default" 
+            className="bg-green-600 hover:bg-green-700 flex items-center gap-2 shadow-md"
+            onClick={exportToExcel}
+          >
+            <FileSpreadsheet className="h-4 w-4" />
+            <span>Export to Excel</span>
+          </Button>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div>
+              <div className="space-y-2">
                 <label className="text-sm font-medium mb-1 block">Report Type</label>
                 <Select value={reportType} onValueChange={setReportType}>
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select report type" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="daily">Daily Report</SelectItem>
+                    <SelectItem value="weekly">Weekly Report</SelectItem>
                     <SelectItem value="monthly">Monthly Report</SelectItem>
                     <SelectItem value="custom">Custom Range</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               
-              <div>
+              <div className="space-y-2">
                 <label className="text-sm font-medium mb-1 block">Start Date</label>
                 <Input
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full"
                 />
               </div>
               
-              <div>
+              <div className="space-y-2">
                 <label className="text-sm font-medium mb-1 block">End Date</label>
                 <Input
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
+                  className="w-full"
                 />
               </div>
               
-              <div>
+              <div className="space-y-2">
                 <label className="text-sm font-medium mb-1 block">Filter by User</label>
                 <Select value={userFilter} onValueChange={setUserFilter}>
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="All Users" />
                   </SelectTrigger>
                   <SelectContent>
@@ -142,31 +174,35 @@ const ReportsPage: React.FC = () => {
             
             <div className="flex flex-col sm:flex-row gap-2">
               <Button 
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 shadow-md"
                 onClick={handleMonthReport}
               >
                 <Calendar className="h-4 w-4" />
                 <span>This Month</span>
               </Button>
               
-              <Button variant="outline" className="flex items-center gap-2">
-                <Search className="h-4 w-4" />
-                <span>Search</span>
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2 border-blue-200 hover:bg-blue-50"
+                onClick={handleWeeklyReport}
+              >
+                <FileText className="h-4 w-4" />
+                <span>Last 7 Days</span>
               </Button>
               
               <Button 
-                variant="default" 
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 ml-auto"
-                onClick={exportToExcel}
+                variant="outline" 
+                className="flex items-center gap-2"
+                onClick={() => toast.success("Search completed")}
               >
-                <FileSpreadsheet className="h-4 w-4" />
-                <span>Export to Excel</span>
+                <Search className="h-4 w-4" />
+                <span>Search</span>
               </Button>
             </div>
             
-            <div className="rounded-md border">
+            <div className="rounded-md border overflow-hidden">
               <Table>
-                <TableHeader>
+                <TableHeader className="bg-gray-50 dark:bg-gray-800">
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Department</TableHead>
@@ -179,7 +215,7 @@ const ReportsPage: React.FC = () => {
                 <TableBody>
                   {filteredRecords.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
+                      <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
                         No records found for the selected criteria
                       </TableCell>
                     </TableRow>
@@ -187,14 +223,14 @@ const ReportsPage: React.FC = () => {
                     filteredRecords.map((record) => {
                       const user = users.find(u => u.id === record.userId);
                       return (
-                        <TableRow key={record.id}>
+                        <TableRow key={record.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                           <TableCell className="font-medium">{record.userName}</TableCell>
                           <TableCell>{user?.department || ""}</TableCell>
                           <TableCell>{format(parseISO(record.timestamp), "yyyy-MM-dd")}</TableCell>
                           <TableCell>{format(parseISO(record.timestamp), "HH:mm:ss")}</TableCell>
                           <TableCell>
                             <span className={`
-                              px-2 py-1 rounded-full text-xs
+                              px-2 py-1 rounded-full text-xs font-medium
                               ${record.type === "IN" ? "bg-green-100 text-green-800" : "bg-orange-100 text-orange-800"}
                             `}>
                               {record.type}
@@ -202,7 +238,7 @@ const ReportsPage: React.FC = () => {
                           </TableCell>
                           <TableCell>
                             <span className={`
-                              px-2 py-1 rounded-full text-xs
+                              px-2 py-1 rounded-full text-xs font-medium
                               ${record.status === "SUCCESS" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}
                             `}>
                               {record.status}
