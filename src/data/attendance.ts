@@ -23,7 +23,7 @@ export const initialAttendanceRecords: AttendanceRecord[] = [
     id: "3",
     userId: "3",
     userName: "Ahmad Wijaya",
-    timestamp: new Date(Date.now() - 10800000).toISOString(), // 3 hours ago
+    timestamp: "2025-04-12T08:00:00.000Z",
     type: "IN",
     status: "SUCCESS"
   }

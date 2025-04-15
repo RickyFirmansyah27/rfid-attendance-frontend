@@ -69,7 +69,7 @@ const AppLayout: React.FC = () => {
       <div className="flex min-h-screen w-full">
         <Sidebar className="border-r">
           <SidebarHeader>
-            Swift Scan
+            Menu Utama
             <SidebarTrigger className="md:hidden ml-auto" />
           </SidebarHeader>
           <SidebarContent>
@@ -94,7 +94,6 @@ const AppLayout: React.FC = () => {
         <div className="flex-1 p-4 md:p-6 overflow-x-hidden">
           <div className="flex items-center mb-4">
             <SidebarTrigger className="mr-4" />
-            <h1 className="text-xl font-bold">Swift Scan</h1>
           </div>
           <Outlet />
         </div>
