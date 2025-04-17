@@ -69,8 +69,8 @@ const ReportsPage: React.FC = () => {
           userName: record.userName,
           idCard: record.idCard,
           date:  format(parseISO(record.timestamp), "yyyy-MM-dd"),
-          timeIn: format(parseISO(record.timeIn), "yyyy-MM-dd"),
-          timeOut: format(parseISO(record.timeOut), "yyyy-MM-dd")
+          timeIn: record.timeIn,
+          timeOut: record.timeOut
         });
       }
     });

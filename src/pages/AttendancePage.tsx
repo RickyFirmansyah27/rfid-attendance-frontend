@@ -70,9 +70,10 @@ const AttendancePage: React.FC = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Time</TableHead>
-                    <TableHead>Type</TableHead>
+                    <TableHead>ID Card</TableHead>
+                    <TableHead>Tanggal</TableHead>
+                    <TableHead>Jam Masuk</TableHead>
+                    <TableHead>Jam Keluar</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -87,16 +88,10 @@ const AttendancePage: React.FC = () => {
                     filteredRecords.map((record) => (
                       <TableRow key={record.id}>
                         <TableCell className="font-medium">{record.userName}</TableCell>
+                        <TableCell className="font-medium">{record.idCard}</TableCell>
                         <TableCell>{format(parseISO(record.timestamp), "yyyy-MM-dd")}</TableCell>
-                        <TableCell>{format(parseISO(record.timestamp), "HH:mm:ss")}</TableCell>
-                        <TableCell>
-                          <span className={`
-                            px-2 py-1 rounded-full text-xs
-                            ${record.type === "IN" ? "bg-green-100 text-green-800" : "bg-orange-100 text-orange-800"}
-                          `}>
-                            {record.type}
-                          </span>
-                        </TableCell>
+                        <TableCell>{record.timeIn}</TableCell>
+                        <TableCell>{record.timeOut}</TableCell>
                         <TableCell>
                           <span className={`
                             px-2 py-1 rounded-full text-xs

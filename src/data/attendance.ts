@@ -9,8 +9,8 @@ export const initialAttendanceRecords: AttendanceRecord[] = [
     userName: "Budi Santoso",
     idCard: "1234567890",
     timestamp: "2025-04-12T08:00:00.000Z",
-    timeOut: "2025-04-12T16:00:00.000Z",
-    timeIn: "2025-04-12T08:00:00.000Z",
+    timeIn: "09:00:00", 
+    timeOut: "17:00:00",
     status: "SUCCESS"
   },
   {
@@ -19,8 +19,8 @@ export const initialAttendanceRecords: AttendanceRecord[] = [
     idCard: "9876543210",
     userName: "Siti Rahayu",
     timestamp: "2025-04-12T08:00:00.000Z",
-    timeOut: "2025-04-12T16:00:00.000Z",
-    timeIn: "2025-04-12T08:00:00.000Z",
+    timeIn: "09:00:00", 
+    timeOut: "17:00:00",
     status: "SUCCESS"
   },
   {
@@ -29,8 +29,8 @@ export const initialAttendanceRecords: AttendanceRecord[] = [
     idCard: "4567890123",
     userName: "Ahmad Wijaya",
     timestamp: "2025-04-12T08:00:00.000Z",
-    timeOut: "2025-04-12T16:00:00.000Z",
-    timeIn: "2025-04-12T08:00:00.000Z",
+    timeIn: "09:00:00", 
+    timeOut: "17:00:00",
     status: "SUCCESS"
   }
 ];
