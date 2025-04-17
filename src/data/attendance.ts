@@ -7,24 +7,30 @@ export const initialAttendanceRecords: AttendanceRecord[] = [
     id: "1",
     userId: "1",
     userName: "Budi Santoso",
-    timestamp: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
-    type: "IN",
+    idCard: "1234567890",
+    timestamp: "2025-04-12T08:00:00.000Z",
+    timeOut: "2025-04-12T16:00:00.000Z",
+    timeIn: "2025-04-12T08:00:00.000Z",
     status: "SUCCESS"
   },
   {
     id: "2",
     userId: "2",
+    idCard: "9876543210",
     userName: "Siti Rahayu",
-    timestamp: new Date(Date.now() - 7200000).toISOString(), // 2 hours ago
-    type: "IN",
+    timestamp: "2025-04-12T08:00:00.000Z",
+    timeOut: "2025-04-12T16:00:00.000Z",
+    timeIn: "2025-04-12T08:00:00.000Z",
     status: "SUCCESS"
   },
   {
     id: "3",
     userId: "3",
+    idCard: "4567890123",
     userName: "Ahmad Wijaya",
     timestamp: "2025-04-12T08:00:00.000Z",
-    type: "IN",
+    timeOut: "2025-04-12T16:00:00.000Z",
+    timeIn: "2025-04-12T08:00:00.000Z",
     status: "SUCCESS"
   }
 ];

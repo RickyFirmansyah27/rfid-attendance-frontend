@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -20,7 +19,6 @@ const ReportsPage: React.FC = () => {
   const [userFilter, setUserFilter] = useState("all");
   const [reportType, setReportType] = useState("daily");
 
-  // Calculate start and end dates for month report
   const handleMonthReport = () => {
     const today = new Date();
     const firstDay = startOfMonth(today);
@@ -31,7 +29,6 @@ const ReportsPage: React.FC = () => {
     toast.success("Monthly report range selected");
   };
 
-  // Set report for last 7 days
   const handleWeeklyReport = () => {
     const today = new Date();
     const lastWeek = subDays(today, 7);
@@ -41,18 +38,17 @@ const ReportsPage: React.FC = () => {
     toast.success("Weekly report range selected");
   };
 
-  // Filter records based on date range and user
   const filteredRecords = records.filter(record => {
     let matchesDateRange = true;
     
     if (startDate) {
       matchesDateRange = matchesDateRange && 
-        format(parseISO(record.timestamp), "yyyy-MM-dd") >= startDate;
+        format(parseISO(record.timeIn), "yyyy-MM-dd") >= startDate;
     }
     
     if (endDate) {
       matchesDateRange = matchesDateRange && 
-        format(parseISO(record.timestamp), "yyyy-MM-dd") <= endDate;
+        format(parseISO(record.timeOut), "yyyy-MM-dd") <= endDate;
     }
     
     const matchesUser = userFilter === "all" || record.userId === userFilter;
@@ -60,19 +56,43 @@ const ReportsPage: React.FC = () => {
     return matchesDateRange && matchesUser;
   });
 
+  const processedRecords = useMemo(() => {
+    const userDateMap = new Map();
+    
+    filteredRecords.forEach(record => {
+      const date = format(parseISO(record.timestamp), "yyyy-MM-dd");
+      const key = `${record.userId}-${date}`;
+      
+      if (!userDateMap.has(key)) {
+        userDateMap.set(key, {
+          userId: record.userId,
+          userName: record.userName,
+          idCard: record.idCard,
+          date:  format(parseISO(record.timestamp), "yyyy-MM-dd"),
+          timeIn: format(parseISO(record.timeIn), "yyyy-MM-dd"),
+          timeOut: format(parseISO(record.timeOut), "yyyy-MM-dd")
+        });
+      }
+    });
+    
+    return Array.from(userDateMap.values())
+      .sort((a, b) => {
+        const dateComparison = a.date.localeCompare(b.date);
+        if (dateComparison !== 0) return dateComparison;
+        return a.userName.localeCompare(b.userName);
+      });
+  }, [filteredRecords]);
+
   // Export to Excel
   const exportToExcel = () => {
-    // Prepare data for export
-    const dataToExport = filteredRecords.map(record => {
-      const user = users.find(u => u.id === record.userId);
+    const dataToExport = processedRecords.map((record, index) => {
       return {
-        "Name": record.userName,
-        "Department": user?.department || "",
-        "Position": user?.position || "",
-        "Date": format(parseISO(record.timestamp), "yyyy-MM-dd"),
-        "Time": format(parseISO(record.timestamp), "HH:mm:ss"),
-        "Type": record.type,
-        "Status": record.status
+        "NO": index + 1,
+        "ID CARD": record.idCard,
+        "NAMA": record.userName,
+        "TANGGAL": record.date,
+        "JAM MASUK": record.inTime || "-",
+        "JAM PULANG": record.outTime || "-"
       };
     });
     
@@ -81,10 +101,7 @@ const ReportsPage: React.FC = () => {
       return;
     }
     
-    // Create worksheet
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    
-    // Create workbook
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance Report");
     
@@ -204,49 +221,32 @@ const ReportsPage: React.FC = () => {
               <Table>
                 <TableHeader className="bg-gray-50 dark:bg-gray-800">
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Department</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Time</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead className="w-12">NO</TableHead>
+                    <TableHead>ID CARD</TableHead>
+                    <TableHead>NAMA</TableHead>
+                    <TableHead>TANGGAL</TableHead>
+                    <TableHead>JAM MASUK</TableHead>
+                    <TableHead>JAM PULANG</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredRecords.length === 0 ? (
+                  {processedRecords.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
                         No records found for the selected criteria
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredRecords.map((record) => {
-                      const user = users.find(u => u.id === record.userId);
-                      return (
-                        <TableRow key={record.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                          <TableCell className="font-medium">{record.userName}</TableCell>
-                          <TableCell>{user?.department || ""}</TableCell>
-                          <TableCell>{format(parseISO(record.timestamp), "yyyy-MM-dd")}</TableCell>
-                          <TableCell>{format(parseISO(record.timestamp), "HH:mm:ss")}</TableCell>
-                          <TableCell>
-                            <span className={`
-                              px-2 py-1 rounded-full text-xs font-medium
-                              ${record.type === "IN" ? "bg-green-100 text-green-800" : "bg-orange-100 text-orange-800"}
-                            `}>
-                              {record.type}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            <span className={`
-                              px-2 py-1 rounded-full text-xs font-medium
-                              ${record.status === "SUCCESS" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}
-                            `}>
-                              {record.status}
-                            </span>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })
+                    processedRecords.map((record, index) => (
+                      <TableRow key={`${record.userId}-${record.date}`} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                        <TableCell className="text-center font-medium">{index + 1}</TableCell>
+                        <TableCell>{record.idCard}</TableCell>
+                        <TableCell className="font-medium">{record.userName}</TableCell>
+                        <TableCell>{record.date}</TableCell>
+                        <TableCell>{record.timeIn || "-"}</TableCell>
+                        <TableCell>{record.timeOut || "-"}</TableCell>
+                      </TableRow>
+                    ))
                   )}
                 </TableBody>
               </Table>

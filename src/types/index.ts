@@ -13,9 +13,11 @@ export interface User {
 export interface AttendanceRecord {
   id: string;
   userId: string;
+  idCard: string;
   userName: string;
   timestamp: string;
-  type: "IN" | "OUT";
+  timeIn: string;
+  timeOut: string;
   status: "SUCCESS" | "FAILED";
 }
 
