@@ -4,10 +4,10 @@ import { User } from "@/types";
 export const users: User[] = [
   {
     id: "1",
-    rfidTag: "A1B2C3D4",
-    name: "Budi Santoso",
+    rfidTag: "1058408635",
+    name: "Ricky Firmansyah",
     department: "Engineering",
-    position: "Senior Developer",
+    position: "Owner Apps",
     imageUrl: "https://randomuser.me/api/portraits/men/32.jpg"
   },
   {
