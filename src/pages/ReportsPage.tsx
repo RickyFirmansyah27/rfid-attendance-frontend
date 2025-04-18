@@ -12,6 +12,12 @@ import { FileSpreadsheet, Search, Calendar, BarChart, FileText } from "lucide-re
 import * as XLSX from 'xlsx';
 import { toast } from "sonner";
 
+const isValidDate = (value: string | undefined) => {
+  if (!value) return false;
+  const date = new Date(value);
+  return !isNaN(date.getTime());
+};
+
 const ReportsPage: React.FC = () => {
   const [records] = useState<AttendanceRecord[]>(initialAttendanceRecords);
   const [startDate, setStartDate] = useState("");
@@ -40,41 +46,41 @@ const ReportsPage: React.FC = () => {
 
   const filteredRecords = records.filter(record => {
     let matchesDateRange = true;
-    
-    if (startDate) {
-      matchesDateRange = matchesDateRange && 
-        format(parseISO(record.timeIn), "yyyy-MM-dd") >= startDate;
+
+    if (startDate && isValidDate(record.timeIn)) {
+      matchesDateRange = matchesDateRange &&
+        format(parseISO(record.timeIn!), "yyyy-MM-dd") >= startDate;
     }
-    
-    if (endDate) {
-      matchesDateRange = matchesDateRange && 
-        format(parseISO(record.timeOut), "yyyy-MM-dd") <= endDate;
+
+    if (endDate && isValidDate(record.timeOut)) {
+      matchesDateRange = matchesDateRange &&
+        format(parseISO(record.timeOut!), "yyyy-MM-dd") <= endDate;
     }
-    
+
     const matchesUser = userFilter === "all" || record.userId === userFilter;
-    
+
     return matchesDateRange && matchesUser;
   });
 
   const processedRecords = useMemo(() => {
     const userDateMap = new Map();
-    
+
     filteredRecords.forEach(record => {
       const date = format(parseISO(record.timestamp), "yyyy-MM-dd");
       const key = `${record.userId}-${date}`;
-      
+
       if (!userDateMap.has(key)) {
         userDateMap.set(key, {
           userId: record.userId,
           userName: record.userName,
           idCard: record.idCard,
-          date:  format(parseISO(record.timestamp), "yyyy-MM-dd"),
+          date: date,
           timeIn: record.timeIn,
           timeOut: record.timeOut
         });
       }
     });
-    
+
     return Array.from(userDateMap.values())
       .sort((a, b) => {
         const dateComparison = a.date.localeCompare(b.date);
@@ -83,7 +89,6 @@ const ReportsPage: React.FC = () => {
       });
   }, [filteredRecords]);
 
-  // Export to Excel
   const exportToExcel = () => {
     const dataToExport = processedRecords.map((record, index) => {
       return {
@@ -91,27 +96,25 @@ const ReportsPage: React.FC = () => {
         "ID CARD": record.idCard,
         "NAMA": record.userName,
         "TANGGAL": record.date,
-        "JAM MASUK": record.inTime || "-",
-        "JAM PULANG": record.outTime || "-"
+        "JAM MASUK": record.timeIn || "-",
+        "JAM PULANG": record.timeOut || "-"
       };
     });
-    
+
     if (dataToExport.length === 0) {
       toast.warning("No data to export");
       return;
     }
-    
+
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance Report");
-    
-    // Generate report title
+
     let reportTitle = "Attendance_Report";
     if (startDate && endDate) {
       reportTitle += `_${startDate}_to_${endDate}`;
     }
-    
-    // Save file
+
     XLSX.writeFile(workbook, `${reportTitle}.xlsx`);
     toast.success("Report exported to Excel successfully!");
   };
@@ -119,7 +122,7 @@ const ReportsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">Attendance Reports</h1>
-      
+
       <Card className="shadow-lg border-t-4 border-t-green-500">
         <CardHeader className="bg-gray-50 dark:bg-gray-800 rounded-t-lg flex flex-row items-center justify-between">
           <CardTitle className="text-xl font-bold flex items-center gap-2">
@@ -135,6 +138,7 @@ const ReportsPage: React.FC = () => {
             <span>Export to Excel</span>
           </Button>
         </CardHeader>
+
         <CardContent className="p-6">
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -152,7 +156,7 @@ const ReportsPage: React.FC = () => {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="space-y-2">
                 <label className="text-sm font-medium mb-1 block">Start Date</label>
                 <Input
@@ -162,7 +166,7 @@ const ReportsPage: React.FC = () => {
                   className="w-full"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <label className="text-sm font-medium mb-1 block">End Date</label>
                 <Input
@@ -172,7 +176,7 @@ const ReportsPage: React.FC = () => {
                   className="w-full"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <label className="text-sm font-medium mb-1 block">Filter by User</label>
                 <Select value={userFilter} onValueChange={setUserFilter}>
@@ -188,7 +192,7 @@ const ReportsPage: React.FC = () => {
                 </Select>
               </div>
             </div>
-            
+
             <div className="flex flex-col sm:flex-row gap-2">
               <Button 
                 className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 shadow-md"
@@ -197,7 +201,7 @@ const ReportsPage: React.FC = () => {
                 <Calendar className="h-4 w-4" />
                 <span>This Month</span>
               </Button>
-              
+
               <Button 
                 variant="outline" 
                 className="flex items-center gap-2 border-blue-200 hover:bg-blue-50"
@@ -206,7 +210,7 @@ const ReportsPage: React.FC = () => {
                 <FileText className="h-4 w-4" />
                 <span>Last 7 Days</span>
               </Button>
-              
+
               <Button 
                 variant="outline" 
                 className="flex items-center gap-2"
@@ -216,7 +220,7 @@ const ReportsPage: React.FC = () => {
                 <span>Search</span>
               </Button>
             </div>
-            
+
             <div className="rounded-md border overflow-hidden">
               <Table>
                 <TableHeader className="bg-gray-50 dark:bg-gray-800">
