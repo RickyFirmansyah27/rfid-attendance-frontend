@@ -1,5 +1,4 @@
 
-// User Types
 export interface User {
   id: string;
   rfidTag: string;
@@ -9,7 +8,6 @@ export interface User {
   imageUrl: string;
 }
 
-// Attendance Types
 export interface AttendanceRecord {
   id: string;
   userId: string;
@@ -21,7 +19,6 @@ export interface AttendanceRecord {
   status: "SUCCESS" | "FAILED";
 }
 
-// Authentication Types
 export interface AuthUser {
   username: string;
   password: string;

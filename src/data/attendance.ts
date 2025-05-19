@@ -1,7 +1,6 @@
 
 import { AttendanceRecord } from "@/types";
 
-// Initial attendance data
 export const initialAttendanceRecords: AttendanceRecord[] = [
   {
     id: "1",
